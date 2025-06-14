@@ -542,23 +542,45 @@ export function formatProjectDetails(projectData: ProjectDetailed): string {
 }
 
 export function loadFromEnvFile() {
-	try {
-		const result = dotenv.config();
-		console.debug(result);
-		if (result.error) {
-			console.debug(
-				'No .env file found or error reading it',
-			);
-			return;
-		}
+	if (process.env.WEBSITE_ROLE_INSTANCE_ID) {
 		console.debug(
-			'Loaded configuration from .env file',
+			`Running on azure instance ${process.env.WEBSITE_ROLE_INSTANCE_ID} with port ${process.env.PORT}`,
 		);
-	} catch (error) {
-		console.error(
-			'Error loading .env file',
-			error,
-		);
+
+		const siteName = process.env['ATLASSIAN_SITE_NAME'] || "";
+		const userEmail = process.env['ATLASSIAN_USER_EMAIL'] || "";
+		const apiToken = process.env['ATLASSIAN_API_TOKEN'] || "";
+
+		if (!siteName || !userEmail || !apiToken) {
+			console.warn(
+				'Missing Atlassian credentials. Please set ATLASSIAN_SITE_NAME, ATLASSIAN_USER_EMAIL, and ATLASSIAN_API_TOKEN environment variables.',
+			);
+			return null;
+		} else {
+
+			console.debug(
+				'Loaded configuration from azure environment variables'
+			);
+		}
+	} else {
+		try {
+			const result = dotenv.config();
+			console.debug(result);
+			if (result.error) {
+				console.debug(
+					'No .env file found or error reading it',
+				);
+				return;
+			}
+			console.debug(
+				'Loaded configuration from .env file',
+			);
+		} catch (error) {
+			console.error(
+				'Error loading .env file',
+				error,
+			);
+		}
 	}
 }
 
